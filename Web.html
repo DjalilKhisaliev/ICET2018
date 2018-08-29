@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Local Map</title>
+<!-- <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/A6227939-7B52-694A-818B-7D442A7B70FF/main.js" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/7AC35B4B-1DBD-B448-8532-1F8B4D134863/abn/main.css"/> -->
+</head>
+<body style="background-color: #d1f0ff; margin:0" onkeypress="getChar()">
+	<style type="text/css">
+		* {
+			font-family: sans-serif;
+		}
+		#pixPoint, #mPoint, #angleHT, #distance, #canvas, #pixelsXY, #metresXY {
+			visibility: hidden;
+		}
+		#log {
+		    display: block;
+		    margin-left: auto;
+		    margin-right: auto;
+		    margin-top: -180px;
+
+			height: 230px;
+			width: 300px;
+			background-color: #707070;
+		}
+		#name {
+			position: relative;
+		    display: block;
+		    margin-left: auto;
+		    margin-right: auto;
+
+		    top: 30px;
+			width: 200px;
+			height: 30px;
+		}
+		#pass {
+			position: relative;
+		    display: block;
+		    margin-left: auto;
+		    margin-right: auto;
+
+		    top: 50px;
+			width: 200px;
+			height: 30px;
+		}
+		#but {
+			position: relative;
+		    display: block;
+		    margin-left: auto;
+		    margin-right: auto;
+
+		    top: 85px;
+			width: 240px;
+			height: 50px;
+			background-color: #cecece;
+		}
+		#canvas {
+			position: absolute;
+			top: 55px;
+			left: 30px;
+		}
+	</style>
+	<h2 id="angleHT" style="margin-left:25px"><pre>Angle   --°</pre></h2>
+	<h2 id="distance"><pre>Distance Point-Person   --m</pre></h2><br>
+	<h2 id="pixPoint" style="margin-left:20px"><pre>XY pix point   --:--</pre></h2>
+	<h2 id="mPoint" style="margin-left:20px"><pre>XY m point   --m;--m</pre></h2>
+	<h2 id='pixelsXY' style="margin-left:15px"><pre>XY pix person   --:--</pre></h2>
+	<h2 id='metresXY' style="margin-left:5px"><pre>XY m person   --m;--m</pre></h2>
+	<div id="log">
+		<input id='name' type="text" placeholder="Username">
+		<input id='pass' type="text" placeholder="Password">
+		<button id='but' onclick="clickButton()">Log in</button>
+	</div>
+	<canvas id="canvas" width="720" height="510" style="margin-left: 320px" onclick="drawAll()"></canvas>
+	<script type="text/javascript">
+		var canvas = document.getElementById("canvas");
+		var context = canvas.getContext("2d");
+
+		var rectWidth = 7,
+		rectHeight = 7;
+		var oCoords = [context.canvas.width/2, context.canvas.height/2];
+		var a, b, c;
+		var oldA;
+
+		var xMan, yMan;
+		var x, y;
+		var constA;
+		var coef4mX = 10/(context.canvas.width/2), coef4mY = 10/(context.canvas.height/2);
+		function drawCanvas() {
+			var xNumSize = Math.round(context.canvas.width/18)-4,
+				yNumSize = Math.round(context.canvas.height/20)-0.5;
+			//var xcount = Math.round(context.canvas.width/2);
+			var xcount = xNumSize;
+			var ycount = yNumSize;
+			var numbX = -1;
+			var numbY = 1;
+			var xLeftLines = oCoords[0];
+			var yUpLines = oCoords[1];
+			var avrgXYstep = Math.round((context.canvas.width/33 + context.canvas.width/24)/2.2) 
+
+			context.beginPath(); 
+			context.moveTo(oCoords[0], 0);
+			context.lineTo(oCoords[0], context.canvas.height);
+			context.lineWidth = 3;
+			context.strokeStyle = "#2b2b2b";
+			context.stroke();
+
+			context.beginPath(); 
+			context.moveTo(0, oCoords[1]);
+			context.lineTo(context.canvas.width, oCoords[1]);
+			context.lineWidth = 3;
+			context.strokeStyle = "#2b2b2b";
+			context.stroke();
+			for (var xi = oCoords[0]; xi < context.canvas.width; xi += avrgXYstep) {
+				context.beginPath(); 
+				context.moveTo(xi, 0);
+				context.lineTo(xi, context.canvas.height);
+				context.lineWidth = 1;
+				context.strokeStyle = "#2b2b2b";
+				context.stroke();
+
+				context.beginPath(); 
+				context.moveTo(xLeftLines, 0);
+				context.lineTo(xLeftLines, context.canvas.height);
+				context.lineWidth = 1;
+				context.strokeStyle = "#2b2b2b";
+				context.stroke();
+				xLeftLines -= avrgXYstep;
+					/*if(xi < Math.ceil((context.canvas.width-15)/(20*2))*20-5 ){
+						context.font = "20px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbX.toString(), xi, (context.canvas.height/2)+8);
+						context.fillRect(xi-3, (context.canvas.height/2)-3, 6, 6);
+						numbX--;
+					}
+					if(xi == Math.ceil((context.canvas.width-15)/(20*2))*20-5 ){
+						numbX = 0;
+						context.fillText(numbX.toString(), xi, (context.canvas.height/2)+8);
+						context.fillRect(xi-3, (context.canvas.height/2)-3, 6, 6);
+						numbX =1;
+					}
+					if(xi >Math.ceil((context.canvas.width-15)/(20*2))*20-5){
+						context.font = "20px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbX.toString(), xi, (context.canvas.height/2)+8);
+						context.fillRect(xi-3, (context.canvas.height/2)-3, 6, 6);
+						numbX++;
+					}*/
+			}
+			for (var yi = oCoords[1]; yi < context.canvas.height; yi += avrgXYstep) {
+				context.beginPath(); 
+				context.moveTo(0, yi);
+				context.lineTo(context.canvas.width, yi);
+				context.lineWidth = 1;
+				context.strokeStyle = "#2b2b2b";
+				context.stroke();
+
+				context.beginPath(); 
+				context.moveTo(0, yUpLines);
+				context.lineTo(context.canvas.width, yUpLines);
+				context.lineWidth = 1;
+				context.strokeStyle = "#2b2b2b";
+				context.stroke();
+				yUpLines -= avrgXYstep;
+					/*if(yi < Math.ceil((context.canvas.height-15)/(20*2))*20-5 ){
+						context.font = "20px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)-20, yi);
+						context.fillRect((context.canvas.width/2)-8, yi, 6, 6);
+						numbY--;
+					}
+					if(yi == Math.ceil((context.canvas.height-15)/(20*2))*20-5 ) {
+						numbY =1;
+					}
+					if(yi > Math.ceil((context.canvas.height-15)/(20*2))*20-5 ){
+						context.font = "20px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)-20, yi);
+						context.fillRect((context.canvas.width/2)-8, yi, 6, 6);
+						numbY++;
+					}*/
+			}
+			while(xcount <= context.canvas.width + 1) {
+				if(xcount <= context.canvas.width/2) {
+					context.font = "18px serif";
+					context.fillStyle = 'rgba(0,0,0,1)';
+					context.fillText(numbX.toString(), context.canvas.width/2-xcount-3, (context.canvas.height/2)-5);
+					context.fillRect(context.canvas.width/2-xcount-3, (context.canvas.height/2)-3, 6, 6);
+					numbX--;
+				} else if(xcount <= context.canvas.width) {
+					if(numbX != 10) {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbX.toString(), xcount-7, (context.canvas.height/2)-5);
+						context.fillRect(xcount-3, (context.canvas.height/2)-3, 6, 6);
+					} else {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbX.toString(), xcount-18, (context.canvas.height/2)-5);
+						context.fillRect(xcount-3, (context.canvas.height/2)-3, 6, 6);
+					}
+					numbX++;
+				}
+				if(xcount >= context.canvas.width/2-10 && xcount <= context.canvas.width/2+10) {
+					numbX = 1;
+				}
+				xcount+= xNumSize;
+			}
+			while(ycount <= context.canvas.height + 1) {
+				if(ycount <= context.canvas.height/2) {
+					if(numbY != 10) {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)+5, context.canvas.height/2-ycount+2);
+						context.fillRect((context.canvas.width/2)-3, context.canvas.height/2-ycount-3, 6, 6);
+					} else {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)+5, context.canvas.height/2-ycount+12);
+						context.fillRect((context.canvas.width/2)-3, context.canvas.height/2-ycount-3, 6, 6);
+					}
+					numbY++;
+				} else if(ycount <= context.canvas.height) {
+					if(numbY != -10) {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)+5, ycount+2);
+						context.fillRect((context.canvas.width/2)-3, ycount-3, 6, 6);
+					} else {
+						context.font = "18px serif";
+						context.fillStyle = 'rgba(0,0,0,1)';
+						context.fillText(numbY.toString(), (context.canvas.width/2)+5, ycount);
+						context.fillRect((context.canvas.width/2)-3, ycount-3, 6, 6);
+					}
+					numbY--;
+				}
+				if(ycount >= context.canvas.height/2-10 && ycount <= context.canvas.height/2+10) {
+					numbY = -1;
+				}
+				ycount+= yNumSize;
+			}
+
+			context.fillStyle = 'rgba(0,0,0,1)';
+			context.fillText(0, context.canvas.width/2+3, context.canvas.height/2-3);
+			context.fillRect(oCoords[0]-3, oCoords[1]-3, 6, 6);
+		}
+
+		function drawPoint() {
+			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+			drawCanvas();
+
+			c = Math.sqrt( Math.pow(x-oCoords[0], 2) + Math.pow(y-oCoords[1], 2) );
+
+			context.fillStyle = 'rgba(230,0,0,1)';
+			context.fillRect(x-rectWidth/2, y-rectHeight/2, rectWidth, rectHeight);
+
+			/*context.beginPath(); 
+			context.lineWidth = 2;
+			context.strokeStyle = "#2b2b2b";
+			context.moveTo(x, y);
+			context.lineTo(oCoords[0], oCoords[1]);
+			context.stroke();*/
+
+
+			var metPointX = Math.round((x-oCoords[0])*coef4mX*100)/100, metPointY = Math.round((oCoords[1]-y)*coef4mY*100)/100;
+			var mPoint = document.getElementById("mPoint");
+			var pixPoint = document.getElementById("pixPoint");
+			pixPoint.innerHTML = '<pre>XY point   ' + (x-oCoords[0]) + ':' + (oCoords[1] - y)+ '</pre>';
+			mPoint.innerHTML = '<pre>XY m point   ' + metPointX + 'm;' + metPointY+ 'm</pre>';
+		}
+
+		function drawMan() {
+			drawPoint();
+
+			var red = 255, green = 0;
+			var metManX = Math.round((xMan-oCoords[0])*coef4mX*100)/100, metManY = Math.round((oCoords[1]-yMan)*coef4mY*100)/100;
+
+			b = Math.sqrt( Math.pow(xMan-oCoords[0], 2) + Math.pow(yMan-oCoords[1], 2) );
+			a = Math.sqrt( Math.pow(xMan-x, 2) + Math.pow(yMan-y, 2) );
+
+			if(a > oldA) {
+				constA = Math.sqrt( Math.pow(xMan-x, 2) + Math.pow(yMan-y, 2) );
+			}
+
+			if (a <= constA && a >= constA/2) {
+				red = 255;
+				green = 255 / (constA/2) * Math.abs(a - constA);
+			} else if (a < constA/2) {
+				green = 255;
+				red = 255 / (constA-a) * a;
+			}
+
+			//if(a <= oldA) {
+				context.beginPath(); 
+				context.lineWidth = 2;
+				context.strokeStyle = 'rgba('+red+', '+green+',0,1)';
+				context.moveTo(xMan, yMan);
+				context.lineTo(x, y);
+				context.stroke();
+			//}
+
+			oldA = a;
+
+
+			var dist = Math.round(Math.sqrt( Math.pow((xMan-x)*coef4mX, 2) + Math.pow((yMan-y)*coef4mY, 2) )*100)/100;
+
+			var angleHTM = document.getElementById("angleHT");
+			var pixXYman = document.getElementById("pixelsXY");
+			var mXYman = document.getElementById("metresXY");
+			var distance = document.getElementById("distance");
+			angleHTM.innerHTML = '<pre>Angle   ' +getAngle()+ '°</pre>';
+			distance.innerHTML = '<pre>Distance Point-Person   ' +dist+ 'm</pre>';
+			pixXYman.innerHTML = '<pre>XY pix person   ' + (xMan-oCoords[0]) + ':' + (oCoords[1] - yMan) + '</pre>';
+			mXYman.innerHTML = '<pre>XY m person   ' + metManX + 'm;' + metManY + 'm</pre>';
+
+
+			context.fillStyle = 'rgba(0,0,255,1)';
+			context.fillRect(xMan-rectWidth/2, yMan-rectHeight/2, rectWidth, rectHeight);
+
+			/*context.beginPath(); 
+			context.lineWidth = 2;
+			context.strokeStyle = "#2b2b2b";
+			context.moveTo(xMan, yMan);
+			context.lineTo(oCoords[0], oCoords[1]);
+			context.stroke();*/
+		}
+
+		function drawAll() {
+			document.getElementById("angleHT").innerHTML = '<pre>Angle   --°</pre>';
+			document.getElementById("pixelsXY").innerHTML = '<pre>XY pix person   --:--</pre>';
+			document.getElementById("metresXY").innerHTML = '<pre>XY m person   --m;--m</pre>';
+
+			x = event.clientX-350;
+			y = event.clientY-55;
+			oldA = 0;
+			xMan = 50;
+			yMan = 50;
+			drawPoint();
+
+			min = 16, max = 80
+			var rand = Math.round(min - 0.5 + Math.random() * (max - min + 1));
+			setTimeout(function() {
+				drawMan();
+			}, rand);
+
+			constA = Math.sqrt( Math.pow(xMan-x, 2) + Math.pow(yMan-y, 2) );
+		}
+
+		function getAngle() {
+			var arccos = Math.acos( (Math.pow(b, 2)+Math.pow(c, 2)-Math.pow(a, 2))/(2*b*c) );
+			var degree = ((arccos*180)/Math.PI)*10000;
+			return Math.round(degree)/10000;
+		}
+
+		function getChar() {
+			if (event.which != 0 && event.charCode != 0) {
+				if (event.which < 32) return null;
+				var g = String.fromCharCode(event.which);
+				if(g=='w' || g=='W' || g=='ц' || g=='Ц') {yMan-=5; drawMan();}
+				if(g=='a' || g=='A' || g=='ф' || g=='Ф') {xMan-=5; drawMan();}
+				if(g=='s' || g=='S' || g=='ы' || g=='Ы') {yMan+=5; drawMan();}
+				if(g=='d' || g=='D' || g=='в' || g=='В') {xMan+=5; drawMan();}
+
+				if(g=='w' || g=='W' || g=='ц' || g=='Ц') {yMan-=5; drawMan();}
+				if(g=='a' || g=='A' || g=='ф' || g=='Ф') {xMan-=5; drawMan();}
+				if(g=='s' || g=='S' || g=='ы' || g=='Ы') {yMan+=5; drawMan();}
+				if(g=='d' || g=='D' || g=='в' || g=='В') {xMan+=5; drawMan();}
+			}
+		}
+
+		function clickButton(){
+			var uName = document.getElementById('name');
+			var uPass = document.getElementById('pass');
+			var logWindow = document.getElementById('log');
+			var pixPoint_doc = document.getElementById('pixPoint');
+			var mPoint_doc = document.getElementById('mPoint');
+			var angleHT_doc = document.getElementById('angleHT');
+			var distance_doc = document.getElementById('distance');
+			var pixelsXY = document.getElementById('pixelsXY');
+			var metresXY = document.getElementById('metresXY');
+			var canvas_doc = document.getElementById('canvas');
+
+			var TOP_SECRET_DONT_WATCH_THIS_USERNAME = '321';
+			var TOP_SECRET_DONT_WATCH_THIS_PASSWORD = '123';
+			if(uName.value != '' && uPass.value != '') {
+				if(uName.value == TOP_SECRET_DONT_WATCH_THIS_USERNAME &&
+				   uPass.value == TOP_SECRET_DONT_WATCH_THIS_PASSWORD) {
+					logWindow.style.visibility = 'hidden';
+					pixPoint_doc.style.visibility = 'visible';
+					mPoint_doc.style.visibility = 'visible';
+					angleHT_doc.style.visibility = 'visible';
+					distance_doc.style.visibility = 'visible';
+					pixelsXY.style.visibility = 'visible';
+					metresXY.style.visibility = 'visible';
+					canvas_doc.style.visibility = 'visible';
+				} else {
+					alert('No!')
+				}
+			}
+		}
+
+		drawCanvas();
+	</script>
+</body>
+</html>
